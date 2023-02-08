@@ -27,6 +27,6 @@ def csv_to_dict(csv_path: str) -> dict:
     mappings_dict = {key: value for key, value in table[1:]}
     return mappings_dict
 
-def get_metadata() -> list:
-    """Returns"""
+def get_metadata():
+    """Returns objects ordered by date"""
     return SwapiMetaData.objects.order_by("-date").values("filename", "date", "id")

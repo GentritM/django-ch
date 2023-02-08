@@ -1,0 +1,31 @@
+{% block content %}
+<!doctype html>
+<html lang="">
+<head>
+    <title>Our Funky HTML Page</title>
+    <meta name="description" content="Our first page">
+    <meta name="keywords" content="html tutorial template">
+</head>
+<body>
+
+<form action="{% url "fetch" %}">
+    <button type="submit">Fetch</button>
+</form>
+
+    <ul>
+     {% for d in data %}
+        <li>{{ d.id }}
+            <a href="/details/{{ d.id }}">
+                {{ d.date }} - {{ d.filename }}
+            </a>
+        </li>
+
+     {% endfor %}
+    </ul>
+
+</body>
+
+<script type='text/javascript' src='https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js'></script>
+
+</html>
+{% endblock %}

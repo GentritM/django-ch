@@ -2,7 +2,6 @@ import requests
 from requests import Response
 from functools import wraps
 import petl as etl
-import csv
 
 from .client import SwapiClient
 from django.conf import settings

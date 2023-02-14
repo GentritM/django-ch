@@ -1,18 +1,143 @@
-{% block content %}
-    <!doctype html>
-    <html lang="">
-    <head>
-        <title>Our Funky HTML Page</title>
-        <meta name="description" content="Our first page">
-        <meta name="keywords" content="html tutorial template">
-    </head>
-    <body>
+<!doctype html>
+<html lang="">
+  <head>
+    <title>Our Funky HTML Page</title>
+    <meta name="description" content="Our first page">
+    <meta name="keywords" content="html tutorial template">
+    <style>
+      .column-button {
+        background-color: #4CAF50;
+        border: none;
+        color: white;
+        padding: 15px 32px;
+        text-align: center;
+        text-decoration: none;
+        display: inline-block;
+        font-size: 16px;
+        margin: 4px 2px;
+        cursor: pointer;
+      }
 
-    {{ data }}
+      .load-more-button {
+        background-color: #DEDEDE;
+        border: none;
+        color: white;
+        padding: 15px 32px;
+        text-align: center;
+        text-decoration: none;
+        display: inline-block;
+        font-size: 16px;
+        margin: 4px 2px;
+        cursor: pointer;
+      }
 
-    </body>
+      .column-button.active {
+        background-color: #008CBA;
+      }
+    </style>
+  </head>
+  <body>
+  {% if data %}
+    <p>
+        {% for header in column_headers %}
+            <button id="{{ header }}" onclick="updateColumnFilters('{{ header }}')" class="column-button">{{ header }}</button>
+        {% endfor %}
+    </p>
+    {{ data | safe }}
+    <button class="load-more-button" style="display: none;" id="load_more_button" onclick="loadMore()">Load more</button>
+  {% else %}
+      <p>No data to show for this file</p>
+  {% endif %}
+  </body>
+  <script type='text/javascript' src='https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js'></script>
+  <script>
+    var columnsSelected = [];
+    var rowsShown = 10;
+    var fullPath = window.location.pathname;
+    $(document).ready(function() {
+      getUrlParams();
+      getRowsNumber();
+    });
 
-    <script type='text/javascript' src='https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js'></script>
+    function getQueryVariable(variable) {
+      var params = window.location.search.substring(1);
+      var paramVars = params.split("&");
+      for (var i = 0; i < paramVars.length; i++) {
+        var pair = paramVars[i].split("=");
+        if (pair[0] == variable) {
+          return pair[1];
+        }
+      }
+      return false;
+    }
 
-    </html>
-{% endblock %}
+    function getRowsNumber() {
+      if (getQueryVariable("rows")) {
+        rowsShown = parseInt(getQueryVariable("rows"));
+      }
+    }
+
+    function getUrlParams() {
+      var pathParams = fullPath.split("/").filter(function(i) {
+        return i;
+      });
+      if (pathParams.length > 2) {
+        pathParams = pathParams[2];
+        columnsSelected = pathParams.split("-");
+        setActiveColumnButtons();
+      } else {
+        document.getElementById("load_more_button").style.display = "inline-block";
+      }
+    }
+
+    function setActiveColumnButtons() {
+      var columnButtons = document.getElementsByClassName('column-button');
+      for (button of columnButtons) {
+        if (columnsSelected.includes(button.id)) {
+          button.classList.add('active');
+        }
+      }
+    }
+
+    function updateColumnFilters(column_name) {
+      if (columnsSelected.includes(column_name)) {
+        console.log(columnsSelected)
+        columnsSelected = columnsSelected.filter(item => item !== column_name);
+      } else {
+        columnsSelected.push(column_name);
+      }
+      console.log(columnsSelected)
+      applyFilters();
+    }
+
+    function applyFilters() {
+      var pageSlug = fullPath.split("/").filter(function(i) {
+        return i;
+      });
+      var selectedColumns = columnsSelected.join("-");
+      var newUrl = "/" + pageSlug[0] + "/" + pageSlug[1] + "/";
+      if (selectedColumns) {
+        newUrl += selectedColumns + "/";
+      }
+      window.location.href = newUrl;
+    }
+
+    function loadMore() {
+      var pageSlug = fullPath.split("/").filter(function(i) {
+        return i;
+      });
+      var selectedColumns = columnsSelected.join("-");
+      var newUrl = "/" + pageSlug[0] + "/" + pageSlug[1] + "/";
+      var queryParams = [];
+      rowsShown += 10;
+      if (rowsShown != 10) {
+        queryParams.push("rows=" + rowsShown);
+      }
+      queryParams = queryParams.join("&");
+      if (queryParams) {
+        newUrl += "?" + queryParams;
+      }
+      window.location.href = newUrl;
+    }
+  </script>
+</html>

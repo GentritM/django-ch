@@ -2,7 +2,6 @@ import requests
 from requests import Response
 from functools import wraps
 import petl as etl
-import csv
 
 from .client import SwapiClient
 from django.conf import settings
@@ -79,4 +78,4 @@ class TransformSwapiData:
     @_check_response_list
     def table_to_html(self):
 
-        self.response_list = etl.tohtml(self.response_list)
+        return etl.tohtml(self.response_list)

@@ -2,7 +2,8 @@ from django.shortcuts import render, redirect
 
 from .service import SwapiClient, TransformSwapiData
 
-from .service.utils import get_metadata
+from .service.utils import get_metadata, get_filedata, table_to_list, join_elements_of_lists, count_occurrence
+import petl as etl
 
 
 def index(request):
@@ -21,8 +22,33 @@ def fetch(request):
     return redirect("index")
 
 
-def details(request, pk):
-    # THe logic to display data filters and everything, unfortunately I did not have time to engineer that,
-    # I had to take a day off to do this challenge after recent events that took place
+def details(request, pk, columns=None):
+    # TODO: All of this could be restructured with a better practice, this gets the job done
+    data = None
+    column_headers = None
+    rows = int(request.GET.get("rows", 10))
 
-    return render(request, "details.html")
+    file_info = get_filedata(pk)
+
+    if file_info:
+        try:
+            table = etl.fromcsv(file_info.csv_location)
+            column_headers = list(etl.header(table))
+            if columns:
+                columns = columns.split('-')
+                table = etl.cut(table, columns)
+                lcols = table_to_list(table)
+                joined_lists = join_elements_of_lists(*lcols)
+                # TODO: the count_occurrence func changed logic so it works with same lists for count methods
+                occurrences = count_occurrence(joined_lists, joined_lists)
+                table = etl.addcolumn(table, 'count', occurrences)
+
+            table = etl.head(table, rows)
+            # TODO: This could be handled with tempfile.TemporaryFile
+            etl.tohtml(table, "temp_table.html")
+            data = open("temp_table.html").read()
+        except:
+            # TODO: no generic exception is good, specific one without print, logging could be better
+            print("Error while fetching data for this file")
+
+    return render(request, "details.html", context={"data": data, "column_headers": column_headers})

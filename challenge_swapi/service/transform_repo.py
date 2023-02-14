@@ -44,9 +44,10 @@ class TransformSwapiData:
     @_check_response_list
     def transform_homeworld_field(self):
         """
-        Handles the logic of homeworld field transformation through a csv file containing mappings
-        so that whenever a name is not there it sends a request and updates the csv, if it is there it just does the
-        transformation"""
+        Handles the logic of homeworld field transformation through a csv file creating it if it doesn't exists containing mappings
+        so that whenever a name is not there it sends a request and updates the csv with the api link and name, if it is there it just reads it and does the
+        transformation
+        """
 
         homeworld_field = set(etl.values(self.response_list, 'homeworld'))
         homeworld_csv_mapping_path = f"{settings.MAPPINGS_DIR}/homeworld_mapping.csv"
